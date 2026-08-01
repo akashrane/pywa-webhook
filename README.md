@@ -1,29 +1,46 @@
 # pywa-webhook
 
-A lightweight, framework-friendly Python library for receiving, verifying, and parsing [Meta WhatsApp Cloud API](https://developers.facebook.com/docs/whatsapp/cloud-api/) webhooks.
+A lightweight Python library for receiving, authenticating, and parsing Meta WhatsApp Cloud API webhooks.
 
-The package is independent of any application or database. It turns Meta's nested webhook payloads into typed Python objects and lets your code decide what to do next.
+## About
 
-## Features
+Meta delivers WhatsApp events as deeply nested webhook payloads. pywa-webhook handles the infrastructure-facing parts—subscription verification, request-signature validation, payload traversal, normalization, and event dispatch—so applications can work with simple typed Python objects.
+
+The library is application-independent. It has no database, ordering, CRM, chatbot, or business-domain assumptions. Use it in customer support systems, notification services, bots, workflow automations, analytics pipelines, or any Python application that needs WhatsApp webhook events.
+
+### What it handles
 
 - Meta webhook challenge verification
-- X-Hub-Signature-256 validation using your Meta App Secret
-- Normalized text, media, location, button, interactive, and status events
-- Sync and async event handlers
-- Framework-neutral parsing and dispatch
-- Optional FastAPI adapter
-- Zero runtime dependencies for the core package
-- Typed package with Python 3.10+ support
+- X-Hub-Signature-256 validation with your Meta App Secret
+- Text, media, location, button, interactive, and status events
+- Sync and async handlers
+- Framework-neutral parsing
+- Optional FastAPI integration
+- Raw Meta payload access when needed
+
+### What it does not handle yet
+
+- Sending WhatsApp messages
+- Downloading media
+- Creating message templates
+- Managing Meta Business assets
+- Storing messages in a database
+
+## Documentation
+
+- [Complete Meta and pywa-webhook setup guide](docs/META_SETUP.md)
+- [Meta WhatsApp Cloud API documentation](https://developers.facebook.com/docs/whatsapp/cloud-api/)
+- [Meta webhook documentation](https://developers.facebook.com/docs/graph-api/webhooks/)
 
 ## Installation
 
-Until the first PyPI release, install directly from GitHub:
+Install from GitHub until the first PyPI release:
 
 ~~~bash
 pip install "pywa-webhook[fastapi] @ git+https://github.com/akashrane/pywa-webhook.git"
 ~~~
 
-For local development:
+For development:
 
 ~~~bash
 git clone https://github.com/akashrane/pywa-webhook.git
@@ -32,7 +49,7 @@ python -m venv .venv
 pip install -e ".[fastapi,dev]"
 ~~~
 
-## FastAPI Example
+## Quick Start
 
 ~~~python
 import os
@@ -52,101 +69,32 @@ app.include_router(create_router(webhook))
 
 
 @webhook.on_message
-def print_message(message):
+def receive_message(message):
     print(f"Message from {message.sender}: {message.text}")
 
 
 @webhook.on_status
-async def print_status(status):
+async def receive_status(status):
     print(f"Message {status.id}: {status.status}")
 ~~~
 
-Run it with:
+Run the application:
 
 ~~~bash
-export WHATSAPP_VERIFY_TOKEN="choose-a-private-verification-token"
-export WHATSAPP_APP_SECRET="your-meta-app-secret"
 uvicorn examples.fastapi_app:app --host 0.0.0.0 --port 8000
 ~~~
 
-On PowerShell:
+Meta must be configured with a public HTTPS callback ending in /webhook. See the [complete setup guide](docs/META_SETUP.md) for app creation, credentials, local tunneling, webhook verification, subscriptions, production setup, and troubleshooting.
 
-~~~powershell
-$env:WHATSAPP_VERIFY_TOKEN = "choose-a-private-verification-token"
-$env:WHATSAPP_APP_SECRET = "your-meta-app-secret"
-uvicorn examples.fastapi_app:app --host 0.0.0.0 --port 8000
-~~~
-
-Your webhook endpoint is:
-
-~~~text
-GET  /webhook
-POST /webhook
-~~~
-
-For local Meta testing, expose port 8000 through an HTTPS tunnel and configure the resulting URL as your Meta callback URL.
-
-## Framework-Neutral Usage
-
-You can use the parser without FastAPI:
+## Framework-Neutral Parsing
 
 ~~~python
 from pywa_webhook import parse_payload
 
-events = parse_payload(meta_payload)
-
-for event in events:
+for event in parse_payload(meta_payload):
     if event.kind == "message":
         print(event.message.sender, event.message.text)
 ~~~
-
-To validate the request signature separately:
-
-~~~python
-from pywa_webhook import verify_signature
-
-verify_signature(
-    raw_request_body,
-    request_headers.get("X-Hub-Signature-256"),
-    app_secret,
-)
-~~~
-
-Signature validation must use the exact raw request bytes received from Meta.
-
-## Message Object
-
-Incoming messages are normalized into a Message dataclass with commonly used fields:
-
-~~~python
-message.id
-message.sender
-message.recipient
-message.timestamp
-message.type
-message.text
-message.profile_name
-message.phone_number_id
-message.media_id
-message.caption
-message.latitude
-message.longitude
-message.raw
-~~~
-
-The original Meta message object is always available through message.raw.
-
-## Meta Configuration
-
-In the Meta developer dashboard:
-
-1. Create or select a Meta app with WhatsApp enabled.
-2. Configure the callback URL as your public HTTPS webhook URL.
-3. Enter the same verification token used by WhatsAppWebhook.
-4. Subscribe to the messages webhook field.
-5. Store your Meta App Secret in an environment variable or secret manager.
-
-The verification token is chosen by you. The App Secret comes from your Meta app settings. Do not commit either value.
 
 ## Testing
 
@@ -155,10 +103,6 @@ pip install -e ".[dev]"
 pytest
 ~~~
 
-## Project Status
+## Status
 
-pywa-webhook is currently an alpha project. The first release focuses on securely receiving and normalizing webhook events. Sending WhatsApp messages may be added as a separate client in a future release.
-
-## Contributing
-
-Issues and pull requests are welcome. Please include tests for behavior changes.
+pywa-webhook is currently alpha software. The first release focuses on securely receiving and normalizing webhook events.
