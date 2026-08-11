@@ -8,6 +8,8 @@ Meta delivers WhatsApp events as deeply nested webhook payloads. pywa-webhook ha
 
 The library is application-independent. It has no database, ordering, CRM, chatbot, or business-domain assumptions. Use it in customer support systems, notification services, bots, workflow automations, analytics pipelines, or any Python application that needs WhatsApp webhook events.
 
+> The project name is under review before the first PyPI release because an established third-party Python framework named PyWa already exists.
+
 ### What it handles
 
 - Meta webhook challenge verification
@@ -28,6 +30,7 @@ The library is application-independent. It has no database, ordering, CRM, chatb
 
 ## Documentation
 
+- [Product comparison and roadmap](docs/ROADMAP.md)
 - [Complete Meta and pywa-webhook setup guide](docs/META_SETUP.md)
 - [Meta WhatsApp Cloud API documentation](https://developers.facebook.com/docs/whatsapp/cloud-api/)
 - [Meta webhook documentation](https://developers.facebook.com/docs/graph-api/webhooks/)
@@ -105,4 +108,4 @@ pytest
 
 ## Status
 
-pywa-webhook is currently alpha software. The first release focuses on securely receiving and normalizing webhook events.
+pywa-webhook is currently alpha software. The first release focuses on securely receiving and normalizing webhook events. See the [roadmap](docs/ROADMAP.md) for planned testing, replay, deduplication, privacy, observability, and framework features.
