@@ -4,15 +4,15 @@ import os
 
 from fastapi import FastAPI
 
-from pywa_webhook import WhatsAppWebhook
-from pywa_webhook.adapters.fastapi import create_router
+from wa_eventkit import Webhook
+from wa_eventkit.adapters.fastapi import create_router
 
-webhook = WhatsAppWebhook(
-    verify_token=os.environ["WHATSAPP_VERIFY_TOKEN"],
-    app_secret=os.environ["WHATSAPP_APP_SECRET"],
+webhook = Webhook(
+    verify_token=os.environ["WA_EVENTKIT_VERIFY_TOKEN"],
+    app_secret=os.environ["WA_EVENTKIT_APP_SECRET"],
 )
 
-app = FastAPI(title="pywa-webhook example")
+app = FastAPI(title="wa-eventkit example")
 app.include_router(create_router(webhook))
 
 
