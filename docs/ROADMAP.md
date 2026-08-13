@@ -8,7 +8,7 @@ The project will focus on one promise:
 
 It will remain application-independent and will not initially compete with complete WhatsApp SDKs that send messages, create templates, manage business accounts, or build bots.
 
-The current project name is under review because an established third-party Python framework named PyWa already exists.
+The project name is **wa-eventkit**, selected to clearly distinguish it from complete WhatsApp SDKs and the established PyWa framework.
 
 ## How We Are Different
 
@@ -103,7 +103,7 @@ async def unknown(event):
     print(event.field, event.raw)
 ~~~
 
-The final package and import name will be selected before the first PyPI release.
+The distribution name is `wa-eventkit`, the Python import is `wa_eventkit`, and the planned CLI command is `wa-eventkit`.
 
 ## CLI Plan
 
@@ -289,7 +289,7 @@ Multi-tenant support should allow:
 
 ### 0.2.0 — Foundation
 
-- [ ] Finalize a distinct project and package name
+- [x] Finalize a distinct project and package name
 - [ ] Expand common message types
 - [ ] Add unknown-event handling
 - [ ] Improve event models and validation errors
