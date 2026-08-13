@@ -1,6 +1,6 @@
 # Meta WhatsApp Cloud API Setup Guide
 
-This guide explains how to connect pywa-webhook to a Meta WhatsApp Cloud API application, receive WhatsApp messages, and print them in a Python terminal.
+This guide explains how to connect wa-eventkit to a Meta WhatsApp Cloud API application, receive WhatsApp messages, and print them in a Python terminal.
 
 Meta's dashboard labels and navigation can change. If a menu name differs, use the equivalent WhatsApp or Webhooks section shown for your app.
 
@@ -8,7 +8,7 @@ Meta's dashboard labels and navigation can change. If a menu name differs, use t
 
 WhatsApp Cloud API uses several values that are easy to confuse.
 
-| Value | Who creates it | Used by pywa-webhook | Purpose |
+| Value | Who creates it | Used by wa-eventkit | Purpose |
 | --- | --- | --- | --- |
 | Verify token | You | Yes | A private string Meta sends during callback verification |
 | App Secret | Meta | Yes | Validates X-Hub-Signature-256 on POST requests |
@@ -17,7 +17,7 @@ WhatsApp Cloud API uses several values that are easy to confuse.
 | WhatsApp Business Account ID | Meta | Not required for basic receiving | Identifies the WhatsApp Business Account |
 | App ID | Meta | Not required for basic receiving | Identifies the Meta application |
 
-Receiving webhook messages does not require an access token inside pywa-webhook. The package needs the Verify Token and App Secret. An access token is needed when your application sends messages or calls protected Graph API endpoints.
+Receiving webhook messages does not require an access token inside wa-eventkit. The package needs the Verify Token and App Secret. An access token is needed when your application sends messages or calls protected Graph API endpoints.
 
 Never commit any token or App Secret to Git.
 
@@ -57,7 +57,7 @@ Meta provides a test WhatsApp number during development.
 4. Complete the recipient verification process if prompted.
 5. Use Meta's test-message control to confirm that the test number can send to your phone.
 
-The temporary access token shown on this page is for Graph API testing and normally expires. It is not used by pywa-webhook to receive messages.
+The temporary access token shown on this page is for Graph API testing and normally expires. It is not used by wa-eventkit to receive messages.
 
 ## 5. Find the App Secret
 
@@ -70,13 +70,13 @@ The temporary access token shown on this page is for Graph API testing and norma
 Set it locally:
 
 ~~~bash
-export WHATSAPP_APP_SECRET="your-meta-app-secret"
+export WA_EVENTKIT_APP_SECRET="your-meta-app-secret"
 ~~~
 
 PowerShell:
 
 ~~~powershell
-$env:WHATSAPP_APP_SECRET = "your-meta-app-secret"
+$env:WA_EVENTKIT_APP_SECRET = "your-meta-app-secret"
 ~~~
 
 The FastAPI adapter uses this value to validate the X-Hub-Signature-256 request header. This confirms that the POST body was signed with your Meta App Secret.
@@ -96,25 +96,25 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 Set the generated value:
 
 ~~~bash
-export WHATSAPP_VERIFY_TOKEN="your-generated-value"
+export WA_EVENTKIT_VERIFY_TOKEN="your-generated-value"
 ~~~
 
 PowerShell:
 
 ~~~powershell
-$env:WHATSAPP_VERIFY_TOKEN = "your-generated-value"
+$env:WA_EVENTKIT_VERIFY_TOKEN = "your-generated-value"
 ~~~
 
 You must enter this exact same value in the Meta webhook configuration. It is used only for the GET verification challenge; it is not an access token.
 
-## 7. Install pywa-webhook
+## 7. Install wa-eventkit
 
 Until a PyPI release is available:
 
 ~~~bash
 python -m venv .venv
 source .venv/bin/activate
-pip install "pywa-webhook[fastapi] @ git+https://github.com/akashrane/pywa-webhook.git"
+pip install "wa-eventkit[fastapi] @ git+https://github.com/akashrane/wa-eventkit.git"
 ~~~
 
 PowerShell activation:
@@ -122,7 +122,7 @@ PowerShell activation:
 ~~~powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install "pywa-webhook[fastapi] @ git+https://github.com/akashrane/pywa-webhook.git"
+pip install "wa-eventkit[fastapi] @ git+https://github.com/akashrane/wa-eventkit.git"
 ~~~
 
 ## 8. Create the Python Application
@@ -134,12 +134,12 @@ import os
 
 from fastapi import FastAPI
 
-from pywa_webhook import WhatsAppWebhook
-from pywa_webhook.adapters.fastapi import create_router
+from wa_eventkit import Webhook
+from wa_eventkit.adapters.fastapi import create_router
 
-webhook = WhatsAppWebhook(
-    verify_token=os.environ["WHATSAPP_VERIFY_TOKEN"],
-    app_secret=os.environ["WHATSAPP_APP_SECRET"],
+webhook = Webhook(
+    verify_token=os.environ["WA_EVENTKIT_VERIFY_TOKEN"],
+    app_secret=os.environ["WA_EVENTKIT_APP_SECRET"],
 )
 
 app = FastAPI()
@@ -212,7 +212,7 @@ For production, use a stable HTTPS domain rather than a development tunnel.
 3. Find the Webhook section.
 4. Select Edit or Configure.
 5. Enter the public callback URL ending in /webhook.
-6. Enter the exact WHATSAPP_VERIFY_TOKEN value.
+6. Enter the exact WA_EVENTKIT_VERIFY_TOKEN value.
 7. Select Verify and Save.
 8. Subscribe the webhook to the messages field.
 
@@ -222,7 +222,7 @@ During verification, Meta sends a GET request similar to:
 /webhook?hub.mode=subscribe&hub.verify_token=...&hub.challenge=...
 ~~~
 
-pywa-webhook compares hub.verify_token with your configured Verify Token and returns hub.challenge as plain text. A mismatch returns HTTP 403.
+wa-eventkit compares hub.verify_token with your configured Verify Token and returns hub.challenge as plain text. A mismatch returns HTTP 403.
 
 The messages subscription delivers both incoming message events and delivery-status events associated with WhatsApp messages.
 
@@ -294,7 +294,7 @@ Do not parse and re-serialize the JSON before verification. Even harmless format
 Framework-neutral applications can validate manually:
 
 ~~~python
-from pywa_webhook import verify_signature
+from wa_eventkit import verify_signature
 
 verify_signature(
     raw_body,
@@ -308,7 +308,7 @@ Invalid or missing signatures raise InvalidSignatureError. The FastAPI adapter c
 Signature checking can be disabled for isolated unit tests:
 
 ~~~python
-webhook = WhatsAppWebhook(
+webhook = Webhook(
     verify_token="test-token",
     verify_signatures=False,
 )
@@ -318,7 +318,7 @@ Do not disable it in a public deployment.
 
 ## 14. Temporary and Production Access Tokens
 
-pywa-webhook does not currently send messages, so an access token is not required for the package's receiving workflow.
+wa-eventkit does not currently send messages, so an access token is not required for the package's receiving workflow.
 
 If another part of your application sends Graph API messages:
 
@@ -356,7 +356,7 @@ Check:
 
 - The URL is public HTTPS and ends in /webhook.
 - uvicorn and the tunnel are running.
-- Meta and WHATSAPP_VERIFY_TOKEN use exactly the same value.
+- Meta and WA_EVENTKIT_VERIFY_TOKEN use exactly the same value.
 - The tunnel forwards to port 8000.
 - No proxy removes the hub query parameters.
 
@@ -368,7 +368,7 @@ The signature does not match.
 
 Check:
 
-- WHATSAPP_APP_SECRET belongs to the same Meta app.
+- WA_EVENTKIT_APP_SECRET belongs to the same Meta app.
 - The proxy has not changed the request body.
 - The exact raw body is used for validation.
 - The x-hub-signature-256 header reaches the application.
