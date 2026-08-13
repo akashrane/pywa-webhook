@@ -3,7 +3,7 @@ import hmac
 
 import pytest
 
-from pywa_webhook import InvalidSignatureError, verify_signature
+from wa_eventkit import InvalidSignatureError, verify_signature
 
 
 def test_accepts_valid_signature():
