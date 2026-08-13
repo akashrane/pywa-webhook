@@ -1,14 +1,14 @@
-# pywa-webhook
+# wa-eventkit
 
 A lightweight Python library for receiving, authenticating, and parsing Meta WhatsApp Cloud API webhooks.
 
 ## About
 
-Meta delivers WhatsApp events as deeply nested webhook payloads. pywa-webhook handles the infrastructure-facing parts—subscription verification, request-signature validation, payload traversal, normalization, and event dispatch—so applications can work with simple typed Python objects.
+Meta delivers WhatsApp events as deeply nested webhook payloads. wa-eventkit handles the infrastructure-facing parts—subscription verification, request-signature validation, payload traversal, normalization, and event dispatch—so applications can work with simple typed Python objects.
 
 The library is application-independent. It has no database, ordering, CRM, chatbot, or business-domain assumptions. Use it in customer support systems, notification services, bots, workflow automations, analytics pipelines, or any Python application that needs WhatsApp webhook events.
 
-> The project name is under review before the first PyPI release because an established third-party Python framework named PyWa already exists.
+> `wa-eventkit` is intentionally focused on webhook testing, security, debugging, and delivery reliability rather than becoming a complete WhatsApp messaging SDK.
 
 ### What it handles
 
@@ -31,7 +31,7 @@ The library is application-independent. It has no database, ordering, CRM, chatb
 ## Documentation
 
 - [Product comparison and roadmap](docs/ROADMAP.md)
-- [Complete Meta and pywa-webhook setup guide](docs/META_SETUP.md)
+- [Complete Meta and wa-eventkit setup guide](docs/META_SETUP.md)
 - [Meta WhatsApp Cloud API documentation](https://developers.facebook.com/docs/whatsapp/cloud-api/)
 - [Meta webhook documentation](https://developers.facebook.com/docs/graph-api/webhooks/)
 
@@ -40,14 +40,14 @@ The library is application-independent. It has no database, ordering, CRM, chatb
 Install from GitHub until the first PyPI release:
 
 ~~~bash
-pip install "pywa-webhook[fastapi] @ git+https://github.com/akashrane/pywa-webhook.git"
+pip install "wa-eventkit[fastapi] @ git+https://github.com/akashrane/wa-eventkit.git"
 ~~~
 
 For development:
 
 ~~~bash
-git clone https://github.com/akashrane/pywa-webhook.git
-cd pywa-webhook
+git clone https://github.com/akashrane/wa-eventkit.git
+cd wa-eventkit
 python -m venv .venv
 pip install -e ".[fastapi,dev]"
 ~~~
@@ -59,12 +59,12 @@ import os
 
 from fastapi import FastAPI
 
-from pywa_webhook import WhatsAppWebhook
-from pywa_webhook.adapters.fastapi import create_router
+from wa_eventkit import Webhook
+from wa_eventkit.adapters.fastapi import create_router
 
-webhook = WhatsAppWebhook(
-    verify_token=os.environ["WHATSAPP_VERIFY_TOKEN"],
-    app_secret=os.environ["WHATSAPP_APP_SECRET"],
+webhook = Webhook(
+    verify_token=os.environ["WA_EVENTKIT_VERIFY_TOKEN"],
+    app_secret=os.environ["WA_EVENTKIT_APP_SECRET"],
 )
 
 app = FastAPI()
@@ -92,7 +92,7 @@ Meta must be configured with a public HTTPS callback ending in /webhook. See the
 ## Framework-Neutral Parsing
 
 ~~~python
-from pywa_webhook import parse_payload
+from wa_eventkit import parse_payload
 
 for event in parse_payload(meta_payload):
     if event.kind == "message":
@@ -108,4 +108,4 @@ pytest
 
 ## Status
 
-pywa-webhook is currently alpha software. The first release focuses on securely receiving and normalizing webhook events. See the [roadmap](docs/ROADMAP.md) for planned testing, replay, deduplication, privacy, observability, and framework features.
+wa-eventkit is currently alpha software. The first release focuses on securely receiving and normalizing webhook events. See the [roadmap](docs/ROADMAP.md) for planned testing, replay, deduplication, privacy, observability, and framework features.
