@@ -1,6 +1,6 @@
 import pytest
 
-from pywa_webhook import InvalidPayloadError, parse_payload
+from wa_eventkit import InvalidPayloadError, parse_payload
 
 
 def test_parses_text_message(text_payload):
