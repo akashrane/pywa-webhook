@@ -2,11 +2,11 @@ import asyncio
 
 import pytest
 
-from pywa_webhook import WhatsAppWebhook, parse_payload
+from wa_eventkit import Webhook, parse_payload
 
 
 def test_verifies_challenge():
-    webhook = WhatsAppWebhook(
+    webhook = Webhook(
         verify_token="verify-me",
         verify_signatures=False,
     )
@@ -21,7 +21,7 @@ def test_verifies_challenge():
 
 
 def test_rejects_wrong_verification_token():
-    webhook = WhatsAppWebhook(
+    webhook = Webhook(
         verify_token="verify-me",
         verify_signatures=False,
     )
@@ -35,7 +35,7 @@ def test_rejects_wrong_verification_token():
 
 
 def test_dispatches_message(text_payload):
-    webhook = WhatsAppWebhook(
+    webhook = Webhook(
         verify_token="verify-me",
         verify_signatures=False,
     )
